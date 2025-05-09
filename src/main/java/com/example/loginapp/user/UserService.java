@@ -1,11 +1,12 @@
 package com.example.loginapp.user;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import com.example.loginapp._core.error.ex.Exception400;
 import com.example.loginapp._core.error.ex.Exception401;
 import com.example.loginapp._core.error.ex.Exception404;
+import lombok.RequiredArgsConstructor;
+import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 // 비지니스로직, 트랜잭션처리, DTO 완료
 @RequiredArgsConstructor
@@ -13,25 +14,27 @@ import com.example.loginapp._core.error.ex.Exception404;
 public class UserService {
     private final UserRepository userRepository;
 
-    @Transactional
-    public void 회원가입(UserRequest.JoinDTO joinDTO) {
+    public User 회원가입(UserRequest.JoinDTO reqDTO) {
         try {
-            userRepository.save(joinDTO.toEntity());
-        } catch (Exception e) {
-            throw new Exception400("잘못된 요청입니다");
-        }
+            String encPassword = BCrypt.hashpw(reqDTO.getPassword(), BCrypt.gensalt());
+            reqDTO.setPassword(encPassword);
 
+            return userRepository.save(reqDTO.toEntity());
+        } catch (Exception e) {
+            throw new Exception400("회원가입 요청이 잘못되었습니다");
+        }
     }
 
+
     public User 로그인(UserRequest.LoginDTO loginDTO) {
-        User user = userRepository.findByUsername(loginDTO.getUsername());
+        User userPS = userRepository.findByUsername(loginDTO.getUsername())
+                .orElseThrow(() -> new Exception401("유저네임 혹은 비밀번호가 틀렸습니다"));
 
-        if (user == null) throw new Exception401("유저네임 혹은 비밀번호가 틀렸습니다");
-
-        if (!user.getPassword().equals(loginDTO.getPassword())) {
+        boolean isSame = BCrypt.checkpw(loginDTO.getPassword(), userPS.getPassword());
+        if (!isSame) {
             throw new Exception401("유저네임 혹은 비밀번호가 틀렸습니다");
         }
-        return user;
+        return userPS;
     }
 
 

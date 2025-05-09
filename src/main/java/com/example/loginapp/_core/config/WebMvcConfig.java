@@ -1,9 +1,9 @@
 package com.example.loginapp._core.config;
 
+import com.example.loginapp._core.interceptor.LoginInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import com.example.loginapp._core.interceptor.LoginInterceptor;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
@@ -15,6 +15,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addPathPatterns("/love/**")
                 .addPathPatterns("/reply/**")
                 .addPathPatterns("/api/**")
+                .addPathPatterns("/")
                 .excludePathPatterns("/board/{id:\\d+}");
     }
 }

@@ -47,7 +47,6 @@ public class UserController {
 
     @PostMapping("/login")
     public String login(UserRequest.LoginDTO loginDTO, HttpServletResponse response) {
-        //System.out.println(loginDTO);
         User sessionUser = userService.로그인(loginDTO);
         session.setAttribute("sessionUser", sessionUser);
 
